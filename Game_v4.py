@@ -204,6 +204,13 @@ def final_score():
     return render_template("final_score.html", winner=winner, scores=game.scores)
 
 
+@app.route("/restart", methods=["POST"])
+def restart():
+    global game
+    game = None
+    return redirect(url_for("index"))
+
+
 @app.route("/game", methods=["POST"])
 def game_post():
     global game

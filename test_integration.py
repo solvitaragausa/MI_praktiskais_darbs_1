@@ -10,7 +10,7 @@ def game():
     return NumberGame(sequence, scores, 0)
 
 
-def test_NumberGame(game: NumberGame):
+def test_number_game(game: NumberGame):
     # Print the initial state
     print("Initial state:", game.sequence, game.scores)
 

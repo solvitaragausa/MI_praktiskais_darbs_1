@@ -76,15 +76,15 @@
 </head>
 <body>
     <h1>New Game</h1>
-    <form action="/newgame" method="post">
+    <form action="/game" method="post">
         <label for="show_tree">Show tree:</label>
         <input type="checkbox" id="show_tree" name="show_tree">
 
         <label for="arr_lenght">Izvēlies virknes garumu(15 - 25):</label>
-        <input type="number" id="arr_lenght" name="arr_lenght" min="15" max="25">
+        <input type="number" id="arr_lenght" name="arr_lenght" min="15" max="25" value="15">
 
         <label for="tree_depth">Tree depth:</label>
-        <input type="number" id="tree_depth" name="tree_depth">
+        <input type="number" id="tree_depth" min="1" name="tree_depth" value="1">
 
         <label for="player">First player (user or ai):</label>
         <select name="player" id="player">

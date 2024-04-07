@@ -169,8 +169,8 @@ def index():
     return render_template("index.html")
 
 
-@app.route("/newgame")
-def newgame():
+@app.route("/game")
+def game_get():
     global game
     # Display the current sequence
     if game == None:
@@ -181,15 +181,15 @@ def newgame():
     valid_moves = game.get_valid_moves()
 
     return render_template(
-        "newgame.html",
+        "game.html",
         player=game.player,
         valid_moves=valid_moves,
         sequence_label=sequence_label,
     )
 
 
-@app.route("/final")
-def final():
+@app.route("/final_score")
+def final_score():
     global game
     if game == None:
         return redirect(url_for("index"))
@@ -201,11 +201,11 @@ def final():
         winner = "Winner player AI"
     else:
         winner = "Winner player HUMAN"
-    return render_template("final.html", winner=winner, scores=game.scores)
+    return render_template("final_score.html", winner=winner, scores=game.scores)
 
 
-@app.route("/newgame", methods=["POST"])
-def new_game():
+@app.route("/game", methods=["POST"])
+def game_post():
     global game
     if "show_tree" in request.form:
         game_inputs.draw_tree = bool(request.form["show_tree"])
@@ -227,7 +227,7 @@ def new_game():
     scores = [0, 0]  # Initial scores
     player_nr = 0 if game_inputs.player == "ai" else 1
     game = NumberGame(sequence, scores, player_nr)
-    return redirect(url_for("newgame"))
+    return redirect(url_for("game_get"))
 
 
 @app.route("/move", methods=["POST"])
@@ -250,9 +250,9 @@ def move():
         # Make the move
     if not game.is_game_over():
         game.make_move(move)
-        return redirect(url_for("newgame"))
+        return redirect(url_for("game_get"))
     else:
-        return redirect(url_for("final"))
+        return redirect(url_for("final_score"))
 
 
 if __name__ == "__main__":

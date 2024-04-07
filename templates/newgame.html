@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Start new Number Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f8f8;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        h1 {
+            margin-top: 20px;
+            font-size: 24px;
+        }
+
+        h2 {
+            font-size: 20px;
+        }
+
+        form {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        label{
+            margin-bottom: 20px;
+
+        }
+        select {
+            width: 200px;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        button {
+            padding: 10px 20px;
+            border-radius: 5px;
+            border: none;
+            background-color: #007bff;
+            color: #fff;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        /* Media query for smaller screens */
+        @media screen and (max-width: 600px) {
+            h1 {
+                font-size: 20px;
+            }
+
+            h2 {
+                font-size: 16px;
+            }
+
+            select {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Current sequence: {{sequence_label}}</h1>
+    <h2>Player: 
+        {% if player == 1 %}
+            Human
+        {% else %}
+            AI
+        {% endif %}
+    </h2>
+    <form action="/move" method="post">
+        {% if player == 1 %}
+            <label for="move">Chose valid move:</label>
+            <select name="move" id="move">
+            {% for valid_move in valid_moves %}
+                <option value="{{ valid_move }}">{{ valid_move }}</option>
+            {% endfor %}
+            </select>
+        {% endif %}
+        
+        <button type="submit">Next move</button><br>
+    </form>
+</body>
+</html>

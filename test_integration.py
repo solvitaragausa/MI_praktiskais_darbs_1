@@ -1,6 +1,6 @@
 import pytest
 import random
-from Game_v3 import NumberGame
+from Game_v4 import NumberGame
 
 @pytest.fixture
 def game():
@@ -110,11 +110,3 @@ def test_choose_best_move():
     # Check that the function returns a valid move
     assert best_move_minimax in game.get_valid_moves()
     assert best_move_alpha_beta in game.get_valid_moves()
-
-
-def test_user_move():
-    # Create a game
-    game = NumberGame([5, 2, 3, 4, 5, 1], [0, 0], 0)
-    user_move = game.get_user_move()
-    assert user_move in game.get_valid_moves()
-

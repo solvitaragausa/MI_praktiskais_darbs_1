@@ -6,6 +6,7 @@ from flask import Flask, render_template, request, redirect, url_for
 
 app = Flask(__name__)
 
+
 class NumberGame:
     def __init__(self, sequence="", scores="", player=""):
         self.sequence = sequence
@@ -145,44 +146,53 @@ class NumberGame:
                 best_move = move
 
         return best_move
-    
+
 
 class GameInputs:
     def __init__(self):
-        self.sequence_length = None,
-        self.draw_tree  = None,
-        self.tree_depth = None,
-        self.player = None,
+        self.sequence_length = (None,)
+        self.draw_tree = (None,)
+        self.tree_depth = (None,)
+        self.player = (None,)
         self.use_alpha_beta = None
-    
+
     def print(self):
         return f"{self.sequence_length}, {self.draw_tree}, {self.tree_depth}, {self.player}, {self.use_alpha_beta}"
+
 
 game_inputs = GameInputs()
 game = None
 
-@app.route('/')
-def index():
-    return render_template('index.html')
 
-@app.route('/newgame')
+@app.route("/")
+def index():
+    return render_template("index.html")
+
+
+@app.route("/newgame")
 def newgame():
     global game
     # Display the current sequence
     if game == None:
-        return redirect(url_for('index'))
-    sequence_label=game.sequence
+        return redirect(url_for("index"))
+    sequence_label = game.sequence
 
     # Display the valid moves
     valid_moves = game.get_valid_moves()
 
-    return render_template('newgame.html', player=game.player, valid_moves=valid_moves, sequence_label=sequence_label)
+    return render_template(
+        "newgame.html",
+        player=game.player,
+        valid_moves=valid_moves,
+        sequence_label=sequence_label,
+    )
 
-@app.route('/final')
+
+@app.route("/final")
 def final():
     global game
     if game == None:
-        return redirect(url_for('index'))
+        return redirect(url_for("index"))
     print("Final scores:", game.scores)
     winner = ""
     if game.scores[0] == game.scores[1]:
@@ -190,52 +200,61 @@ def final():
     elif game.scores[0] > game.scores[1]:
         winner = "Winner player AI"
     else:
-        winner = "Winner player HUMAN" 
-    return render_template('final.html', winner=winner, scores=game.scores)
+        winner = "Winner player HUMAN"
+    return render_template("final.html", winner=winner, scores=game.scores)
 
-@app.route('/newgame', methods=['POST'])
+
+@app.route("/newgame", methods=["POST"])
 def new_game():
     global game
-    if 'show_tree' in request.form:
-        game_inputs.draw_tree = bool(request.form['show_tree'])
-    game_inputs.player = str(request.form['player'])
-    game_inputs.use_alpha_beta = str(request.form['algorithm'])
-    game_inputs.tree_depth = int(request.form['tree_depth'])
-    game_inputs.sequence_length = int(request.form['arr_lenght'])
-    print("inputs: " ,game_inputs.draw_tree, game_inputs.player, game_inputs.use_alpha_beta, game_inputs.tree_depth, game_inputs.sequence_length)
+    if "show_tree" in request.form:
+        game_inputs.draw_tree = bool(request.form["show_tree"])
+    game_inputs.player = str(request.form["player"])
+    game_inputs.use_alpha_beta = str(request.form["algorithm"])
+    game_inputs.tree_depth = int(request.form["tree_depth"])
+    game_inputs.sequence_length = int(request.form["arr_lenght"])
+    print(
+        "inputs: ",
+        game_inputs.draw_tree,
+        game_inputs.player,
+        game_inputs.use_alpha_beta,
+        game_inputs.tree_depth,
+        game_inputs.sequence_length,
+    )
 
     sequence = [random.randint(1, 6) for _ in range(game_inputs.sequence_length)]
     print(("Original sequence: {}").format(sequence))
     scores = [0, 0]  # Initial scores
     player_nr = 0 if game_inputs.player == "ai" else 1
     game = NumberGame(sequence, scores, player_nr)
-    return redirect(url_for('newgame'))
+    return redirect(url_for("newgame"))
 
-@app.route('/move', methods=['POST'])
+
+@app.route("/move", methods=["POST"])
 def move():
     global game
     if game == None:
-        return redirect(url_for('index'))
+        return redirect(url_for("index"))
     if game.player == 1:
         # User's turn
-        move = ast.literal_eval(request.form['move'])
+        move = ast.literal_eval(request.form["move"])
         print(f"Human move: {move}")
 
     else:
         # AI's turn
-        move = game.choose_best_move(game_inputs.tree_depth, game_inputs.use_alpha_beta, game_inputs.draw_tree)
+        move = game.choose_best_move(
+            game_inputs.tree_depth, game_inputs.use_alpha_beta, game_inputs.draw_tree
+        )
         print(f"AI move: {move}")
 
         # Make the move
     if not game.is_game_over():
         game.make_move(move)
-        return redirect(url_for('newgame'))
+        return redirect(url_for("newgame"))
     else:
-        return redirect(url_for('final'))
-
+        return redirect(url_for("final"))
 
 
 if __name__ == "__main__":
-    webbrowser.open('http://127.0.0.1:5000')
+    webbrowser.open("http://127.0.0.1:5000")
     app.run(debug=True, use_reloader=False, use_debugger=False)
-    

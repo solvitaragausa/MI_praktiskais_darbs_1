@@ -2,11 +2,13 @@ import pytest
 import random
 from Game_v4 import NumberGame
 
+
 @pytest.fixture
 def game():
     sequence = [random.randint(1, 6) for _ in range(8)]
     scores = [0, 0]  # Initial scores
     return NumberGame(sequence, scores, 0)
+
 
 def test_NumberGame(game: NumberGame):
     # Print the initial state

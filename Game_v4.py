@@ -217,7 +217,7 @@ def game_post():
     if "show_tree" in request.form:
         game_inputs.draw_tree = bool(request.form["show_tree"])
     game_inputs.player = str(request.form["player"])
-    game_inputs.use_alpha_beta = str(request.form["algorithm"])
+    game_inputs.use_alpha_beta = (str(request.form["algorithm"]) == "alpha-beta")
     game_inputs.tree_depth = int(request.form["tree_depth"])
     game_inputs.sequence_length = int(request.form["arr_lenght"])
     print(

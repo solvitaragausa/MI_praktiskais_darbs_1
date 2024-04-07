@@ -1,0 +1,8 @@
+*.h5
+*venv*
+.vscode/
+.env
+*.jpg
+
+*/__pycache__/
+.pytest_cache/

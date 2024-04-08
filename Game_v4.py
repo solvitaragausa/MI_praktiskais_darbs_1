@@ -1,4 +1,5 @@
 import ast
+import time
 import random
 import webbrowser
 
@@ -8,14 +9,26 @@ app = Flask(__name__)
 
 
 class NumberGame:
+    visited_node_cnt = 0
+
     def __init__(self, sequence="", scores="", player=""):
         self.sequence = sequence
         self.scores = scores
         self.player = player  # 0 for the first player, 1 for the second player
+        self.start_time = 0
+        self.end_time = 0
+        self.move_times = []
 
     def copy(self):
         # Create a new game with the same sequence and scores
         return NumberGame(self.sequence[:], self.scores[:], self.player)
+
+    def get_average_move_time(self):
+        return (
+            round(sum(self.move_times) / len(self.move_times), 4)
+            if self.move_times
+            else 0
+        )
 
     def get_valid_moves(self):
         # A valid move is to pair two numbers or remove an unpaired number
@@ -67,6 +80,8 @@ class NumberGame:
     def minimax(
         self, depth: int = 3, maximizing_player: bool = True, debug: bool = False
     ):
+        NumberGame.visited_node_cnt += 1
+        print("Visited node nr : ", NumberGame.visited_node_cnt)
         if debug:
             # Print the current state, depth, and score
             print("Depth:", depth)
@@ -96,6 +111,7 @@ class NumberGame:
             return min_eval
 
     def alpha_beta_pruning(self, depth, alpha, beta, maximizing_player):
+        NumberGame.visited_node_cnt += 1
         if depth == 0 or self.is_game_over():
             return self.evaluate()
 
@@ -127,6 +143,7 @@ class NumberGame:
             return min_eval
 
     def choose_best_move(self, depth, use_alpha_beta, debug_tree: bool = False):
+        self.start_time = time.time()
         best_score = -float("inf")
         best_move = None
 
@@ -144,6 +161,8 @@ class NumberGame:
             if score > best_score:
                 best_score = score
                 best_move = move
+        self.end_time = time.time()
+        self.move_times.append(self.end_time - self.start_time)
 
         return best_move
 
@@ -151,7 +170,7 @@ class NumberGame:
 class GameInputs:
     def __init__(self):
         self.sequence_length = (None,)
-        self.draw_tree = (None,)
+        self.draw_tree = False
         self.tree_depth = (None,)
         self.player = (None,)
         self.use_alpha_beta = None
@@ -201,7 +220,14 @@ def final_score():
         winner = "Winner player AI"
     else:
         winner = "Winner player HUMAN"
-    return render_template("final_score.html", winner=winner, scores=game.scores)
+    print("Moves made al together : ", len(game.move_times))
+    return render_template(
+        "final_score.html",
+        winner=winner,
+        scores=game.scores,
+        comp_visited_nodes=NumberGame.visited_node_cnt,
+        avg_time_taken=game.get_average_move_time(),
+    )
 
 
 @app.route("/restart", methods=["POST"])
@@ -217,7 +243,7 @@ def game_post():
     if "show_tree" in request.form:
         game_inputs.draw_tree = bool(request.form["show_tree"])
     game_inputs.player = str(request.form["player"])
-    game_inputs.use_alpha_beta = (str(request.form["algorithm"]) == "alpha-beta")
+    game_inputs.use_alpha_beta = str(request.form["algorithm"]) == "alpha-beta"
     game_inputs.tree_depth = int(request.form["tree_depth"])
     game_inputs.sequence_length = int(request.form["arr_lenght"])
     print(

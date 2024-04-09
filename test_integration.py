@@ -70,7 +70,7 @@ def test_is_game_over():
 
 def test_evaluate():
     game = NumberGame([1], [3, 2], 0)
-    assert game.evaluate() == 0
+    assert game.evaluate() == 2
 
 
 def test_minimax():
@@ -86,15 +86,15 @@ def test_alpha_beta_pruning():
     # Run the Alpha-Beta Pruning algorithm
     game = NumberGame([5, 2, 3, 4, 5, 1], [0, 0], 0)
     best_score = game.alpha_beta_pruning(
-        5, -float("inf"), float("inf"), True
+        5, -float("inf"), float("inf"), True, True
     )  # Adjust the depth as needed
     print("Best score:", best_score)
-    assert game.alpha_beta_pruning(3, -float("inf"), float("inf"), True) >= -float(
-        "inf"
-    )
-    assert game.alpha_beta_pruning(3, -float("inf"), float("inf"), False) <= float(
-        "inf"
-    )
+    assert game.alpha_beta_pruning(
+        3, -float("inf"), float("inf"), True, True
+    ) >= -float("inf")
+    assert game.alpha_beta_pruning(
+        3, -float("inf"), float("inf"), False, True
+    ) <= float("inf")
 
 
 def test_choose_best_move():

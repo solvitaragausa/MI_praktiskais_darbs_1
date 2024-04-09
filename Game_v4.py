@@ -10,6 +10,7 @@ app = Flask(__name__)
 
 class NumberGame:
     visited_node_cnt = 0
+    max_depth = 0
 
     def __init__(self, sequence="", scores="", player=""):
         self.sequence = sequence
@@ -63,31 +64,27 @@ class NumberGame:
         # The score of the game state is the difference between the two players' scores
         score_diff = self.scores[0] - self.scores[1]
 
-        # Calculate the sum of pairs that can be formed in the sequence
-        pair_sum = sum(
-            self.sequence[i] + self.sequence[i + 1]
-            for i in range(0, len(self.sequence) - 1, 2)
-        )
-
         # Count the number of unpaired numbers in the sequence
         unpaired_count = len(self.sequence) % 2
 
         # Calculate a weighted sum of the factors
-        h_value = score_diff + pair_sum - unpaired_count
+        h_value = score_diff + unpaired_count
 
         return h_value
 
     def minimax(
-        self, depth: int = 3, maximizing_player: bool = True, debug: bool = False
+        self,
+        depth: int = 3,
+        maximizing_player: bool = True,
+        debug: bool = False,
     ):
         NumberGame.visited_node_cnt += 1
-        print("Visited node nr : ", NumberGame.visited_node_cnt)
         if debug:
             # Print the current state, depth, and score
-            print("Depth:", depth)
-            print("Sequence:", self.sequence)
-            print("Scores:", self.scores)
-            print("Evaluation:", self.evaluate())
+            print(" " * 3 * (NumberGame.max_depth - depth), "Depth:", depth)
+            print(" " * 3 * (NumberGame.max_depth - depth), "Sequence:", self.sequence)
+            print(" " * 3 * (NumberGame.max_depth - depth), "Scores:", self.scores)
+            print(" " * 3 * (NumberGame.max_depth - depth), "Evaluation:", self.evaluate())
             print()
 
         if depth == 0 or self.is_game_over():
@@ -95,7 +92,7 @@ class NumberGame:
 
         if maximizing_player:
             max_eval = float("-inf")
-            for move in self.get_valid_moves():
+            for idx, move in enumerate(self.get_valid_moves()):
                 new_game = self.copy()  # Create a copy of the game
                 new_game.make_move(move)  # Make the move
                 evaluation = new_game.minimax(depth - 1, False, debug)  # Recurse
@@ -110,8 +107,17 @@ class NumberGame:
                 min_eval = min(min_eval, evaluation)
             return min_eval
 
-    def alpha_beta_pruning(self, depth, alpha, beta, maximizing_player):
+    def alpha_beta_pruning(self, depth, alpha, beta, maximizing_player, debug):
         NumberGame.visited_node_cnt += 1
+        if debug:
+            # Print the current state, depth, and score
+            print(" " * 3 * (NumberGame.max_depth - depth), "Depth:", depth)
+            print(" " * 3 * (NumberGame.max_depth - depth), "Sequence:", self.sequence)
+            print(" " * 3 * (NumberGame.max_depth - depth), "Scores:", self.scores)
+            print(
+                " " * 3 * (NumberGame.max_depth - depth), "Evaluation:", self.evaluate()
+            )
+            print()
         if depth == 0 or self.is_game_over():
             return self.evaluate()
 
@@ -121,7 +127,7 @@ class NumberGame:
                 new_game = self.copy()  # Create a copy of the game
                 new_game.make_move(move)  # Make the move
                 evaluation = new_game.alpha_beta_pruning(
-                    depth - 1, alpha, beta, False
+                    depth - 1, alpha, beta, False, debug
                 )  # Recurse
                 max_eval = max(max_eval, evaluation)
                 alpha = max(alpha, evaluation)
@@ -134,7 +140,7 @@ class NumberGame:
                 new_game = self.copy()  # Create a copy of the game
                 new_game.make_move(move)  # Make the move
                 evaluation = new_game.alpha_beta_pruning(
-                    depth - 1, alpha, beta, True
+                    depth - 1, alpha, beta, True, debug
                 )  # Recurse
                 min_eval = min(min_eval, evaluation)
                 beta = min(beta, evaluation)
@@ -143,6 +149,7 @@ class NumberGame:
             return min_eval
 
     def choose_best_move(self, depth, use_alpha_beta, debug_tree: bool = False):
+
         self.start_time = time.time()
         best_score = -float("inf")
         best_move = None
@@ -153,7 +160,7 @@ class NumberGame:
 
             if use_alpha_beta:
                 score = new_game.alpha_beta_pruning(
-                    depth, -float("inf"), float("inf"), False
+                    depth, -float("inf"), float("inf"), False, debug_tree
                 )
             else:
                 score = new_game.minimax(depth, True, debug_tree)
@@ -220,7 +227,6 @@ def final_score():
         winner = "Winner player AI"
     else:
         winner = "Winner player HUMAN"
-    print("Moves made al together : ", len(game.move_times))
     return render_template(
         "final_score.html",
         winner=winner,
@@ -260,6 +266,7 @@ def game_post():
     scores = [0, 0]  # Initial scores
     player_nr = 0 if game_inputs.player == "ai" else 1
     game = NumberGame(sequence, scores, player_nr)
+    NumberGame.max_depth = game_inputs.tree_depth
     return redirect(url_for("game_get"))
 
 
